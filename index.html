@@ -139,7 +139,7 @@
       </div>
       <div class="date-filter-box">
         <span>📅 기준일:</span>
-        <input type="date" id="targetDate" class="date-input" value="2026-06-01" onchange="applyFilters()">
+        <input type="date" id="targetDate" class="date-input" value="2026-11-01" onchange="applyFilters()">
         <button onclick="resetDate()" style="padding: 4px 8px; border:1px solid #ccc; background:#fff; border-radius:4px; cursor:pointer;">전체기간</button>
       </div>
       <input type="text" id="searchInput" class="search-input" placeholder="🔍 POS명, POS코드 검색..." onkeyup="applyFilters()">
@@ -152,11 +152,11 @@
 
   <script>
     // 🔗 1단계에서 복사한 구글 시트 웹 게시 CSV 링크를 아래 큰따옴표 안에 입력해 주세요.
-    const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRjVHw6K6oBZUyI0HSYjIe8Ra2Y7YSz1TXqOoXdGjQJhjxoMt4YXnfMrVfDygAWJDMoOptMad16j_Ss/pub?output=csv; 
+    const SHEET_CSV_URL = "./monitor_results.csv"; 
 
     let STORES = [];
 
-    // function secureRefresh() {
+    function secureRefresh() {
   alert("새로고침 버튼 연결 성공!");
   const pw = prompt("새로고침 비밀번호를 입력하세요:");
   if (pw === "0312") {
@@ -198,7 +198,23 @@
         const response = await fetch(SHEET_CSV_URL + cacheBuster);
         const csvText = await response.text();
         
-        STORES = parseCSV(csvText);
+        const rows = parseCSV(csvText);
+        
+STORES = rows.map(row => ({
+  store_name: row.store_name || ",
+  store_code: ",
+  pos_name: row.store_name || ",
+  pos_code: row.place_id || ",
+  type: ",
+  photo_date: row.photo_date || ",
+  news_date: row.news_date || ",
+  photo_status: row.photo_status || ",
+  news_status: row.news_status || ",
+  overall_status: row.overall_status || ",
+  url: row.place_id
+    ? `https://m.place.naver.com/place/${row.place_id}/home`
+    : "
+}));
 
         initAgencyDropdown();
         applyFilters();
