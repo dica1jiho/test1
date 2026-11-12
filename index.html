@@ -156,78 +156,15 @@
 
     let STORES = [];
 
-    // 비밀번호 검증 후 실시간 재조회
-    async function secureRefresh() {
-  // ① 비밀번호 입력
+    // function secureRefresh() {
+  alert("새로고침 버튼 연결 성공!");
   const pw = prompt("새로고침 비밀번호를 입력하세요:");
-  if (pw === null) {
-    return;
-  }
-  if (pw !== "0312") {
+  if (pw === "0312") {
+    alert("비밀번호 확인 성공!");
+  } else if (pw !== null) {
     alert("비밀번호가 틀렸습니다.");
-    return;
-  }
-  // ② 화면에서 기준일 가져오기
-  const targetDate =
-    document.getElementById("targetDate").value;
-  if (!targetDate) {
-    alert("먼저 기준일을 선택해주세요.");
-    return;
-  }
-  // ③ 새로고침 버튼 상태 변경
-  const button =
-    document.querySelector(".btn-refresh");
-  const originalText =
-    button.textContent;
-  try {
-    button.disabled = true;
-    button.textContent = "? 확인 중...";
-    // ④ Netlify 함수 호출
-    const response = await fetch(
-      "/.netlify/functions/check-place",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          targetDate: targetDate
-        })
-      }
-    );
-    // ⑤ Netlify에서 받은 결과
-    const result = await response.json();
-    // 오류가 있다면
-    if (!response.ok) {
-      throw new Error(
-        result.message ||
-        "서버 연결에 실패했습니다."
-      );
-    }
-    // ⑥ 성공
-    alert(
-      "? " +
-      result.message +
-      "\n\n기준일: " +
-      result.targetDate
-    );
-  } catch (error) {
-    console.error(
-      "Netlify 함수 오류:",
-      error
-    );
-    alert(
-      "? 오류가 발생했습니다.\n\n" +
-      error.message
-    );
-  } finally {
-    // 버튼 원상복구
-    button.disabled = false;
-    button.textContent =
-      originalText;
   }
 }
-
     // CSV 파싱 알고리즘
     function parseCSV(text) {
       const lines = text.split('\n');
