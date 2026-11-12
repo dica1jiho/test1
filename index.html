@@ -1,280 +1,388 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LG U+ 전문 상담 매장</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>경인소매 네이버플레이스 실시간 모니터링</title>
+  <style>
+    :root {
+      --bg-color: #f4f6f8;
+      --card-bg: #ffffff;
+      --text-main: #222222;
+      --text-sub: #666666;
+      --lgu-magenta: #e6007e;
+      --status-ok: #2ea44f;        /* 초록색: 기준일 이후 갱신완료 */
+      --status-updated: #d93025;   /* 빨간색: 미갱신 */
+      --border-radius: 12px;
+    }
 
-    <link rel="stylesheet" href="css/style.css">
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      padding-bottom: 24px;
+      line-height: 1.4;
+    }
 
-    <!-- Google Font -->
-    <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    .brand-banner {
+      background: linear-gradient(135deg, #e6007e 0%, #8a0050 100%);
+      color: white;
+      padding: 18px 16px;
+      border-bottom-left-radius: 18px;
+      border-bottom-right-radius: 18px;
+      box-shadow: 0 4px 12px rgba(230, 0, 126, 0.2);
+      margin-bottom: 14px;
+    }
 
-    <!-- FontAwesome -->
-    <link rel="stylesheet"
-          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    .brand-header { display: flex; justify-content: space-between; align-items: center; }
+    .logo-area { display: flex; align-items: center; gap: 8px; }
+    .uplus-mark {
+      width: 26px; height: 26px; background-color: white; color: var(--lgu-magenta);
+      border-radius: 6px; display: flex; align-items: center; justify-content: center;
+      font-weight: 900; font-size: 13px;
+    }
+    .header-title { font-size: 15px; font-weight: 700; }
+    .btn-refresh {
+      background-color: rgba(255, 255, 255, 0.25); color: white;
+      border: 1px solid rgba(255, 255, 255, 0.4); padding: 6px 10px;
+      border-radius: 8px; font-weight: 600; font-size: 12px; cursor: pointer;
+    }
+
+    .container { padding: 0 14px; }
+
+    .summary-card {
+      background: var(--card-bg); border-radius: var(--border-radius);
+      padding: 14px; margin-bottom: 12px; display: flex; justify-content: space-around;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+    }
+    .summary-item { text-align: center; }
+    .summary-item .num { font-size: 18px; font-weight: 700; }
+    .summary-item .label { font-size: 11px; color: var(--text-sub); }
+    .num.ok { color: var(--status-ok); }
+
+    .filter-card {
+      background: var(--card-bg); border-radius: var(--border-radius);
+      padding: 12px; margin-bottom: 14px; box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+      display: flex; flex-direction: column; gap: 8px;
+    }
+    .filter-row { display: flex; gap: 8px; }
+    select, input {
+      padding: 9px 12px; border-radius: 8px; border: 1px solid #ddd;
+      font-size: 13px; outline: none; background: #fff;
+    }
+    .select-filter { flex: 1; }
+    .date-filter-box {
+      display: flex; align-items: center; gap: 8px; background: #f8f9fa;
+      padding: 8px 10px; border-radius: 8px; font-size: 12px; color: var(--text-sub);
+    }
+    .date-input { flex: 1; border: 1px solid #ccc; }
+    .search-input { width: 100%; }
+
+    .store-list { display: flex; flex-direction: column; gap: 10px; }
+    .store-card {
+      background: var(--card-bg); border-radius: var(--border-radius);
+      padding: 14px; box-shadow: 0 2px 6px rgba(0,0,0,0.04); border-left: 5px solid #ccc;
+    }
+    .card-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; }
+    .pos-name { font-size: 15px; font-weight: 700; color: #111; }
+    .store-agency { font-size: 12px; color: #555; margin-top: 2px; }
+    .type-tag { font-size: 10px; padding: 2px 6px; border-radius: 4px; background: #eef2f5; color: #444; font-weight: 600; }
+
+    .update-status-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 10px 0; }
+    .status-box { background: #f8f9fa; border-radius: 8px; padding: 8px 10px; border: 1px solid #eee; }
+    .status-box-title { font-size: 11px; font-weight: 600; color: var(--text-sub); margin-bottom: 4px; display: flex; justify-content: space-between; }
+    .status-box-date { font-size: 12px; font-weight: 700; }
+    .updated-ok { color: var(--status-ok); }
+    .updated-danger { color: var(--status-updated); }
+    .badge-ok { background-color: var(--status-ok); color: white; padding: 2px 6px; border-radius: 4px; font-size: 10px; }
+    .badge-danger { background-color: var(--status-updated); color: white; padding: 2px 6px; border-radius: 4px; font-size: 10px; }
+
+    .btn-link {
+      display: block; width: 100%; text-align: center; padding: 8px 0;
+      background-color: #f0f2f5; color: #333; text-decoration: none;
+      font-size: 12px; font-weight: 600; border-radius: 6px; margin-top: 6px;
+    }
+    .loading-text { text-align: center; padding: 30px; color: #666; font-size: 14px; }
+  </style>
 </head>
-
 <body>
 
-<!-- ================= HEADER ================= -->
+  <div class="brand-banner">
+    <div class="brand-header">
+      <div class="logo-area">
+        <div class="uplus-mark">u+</div>
+        <div class="header-title">경인소매 네이버플레이스 실시간 모니터링</div>
+      </div>
+      <!-- 새로고침 버튼 (비밀번호 0312 인증) -->
+      <button class="btn-refresh" onclick="secureRefresh()">🔄 실시간 새로고침</button>
+    </div>
+  </div>
 
-<header>
-
-    <div class="container">
-
-        <div class="logo">
-            LG U+ 전문 상담
-        </div>
-
-        <nav>
-
-            <ul>
-
-                <li><a href="#home">HOME</a></li>
-
-                <li><a href="#phones">휴대폰</a></li>
-
-                <li><a href="#internet">인터넷</a></li>
-
-                <li><a href="#benefit">혜택</a></li>
-
-                <li><a href="#contact">상담신청</a></li>
-
-            </ul>
-
-        </nav>
-
+  <div class="container">
+    <div class="summary-card">
+      <div class="summary-item"><div class="num" id="total-count">0</div><div class="label">조회 매장</div></div>
+      <div class="summary-item"><div class="num ok" id="photo-ok-count">0</div><div class="label">사진 갱신완료</div></div>
+      <div class="summary-item"><div class="num ok" id="news-ok-count">0</div><div class="label">소식 갱신완료</div></div>
     </div>
 
-</header>
-
-<!-- ================= HERO ================= -->
-
-<section class="hero" id="home">
-
-    <div class="hero-text">
-
-        <h1>
-            최신 휴대폰과<br>
-            인터넷 가입 상담
-        </h1>
-
-        <p>
-
-            다양한 통신 상품을 비교하고
-            전문 상담을 받아보세요.
-
-        </p>
-
-        <a href="#contact" class="btn">
-            상담 신청하기
-        </a>
-
+    <div class="filter-card">
+      <div class="filter-row">
+        <select id="typeFilter" class="select-filter" onchange="applyFilters()">
+          <option value="ALL">전체 유형 (투자/자가)</option>
+          <option value="투자">투자 매장만</option>
+          <option value="자가">자가 매장만</option>
+        </select>
+        <select id="agencyFilter" class="select-filter" onchange="applyFilters()">
+          <option value="ALL">전체 대리점(점명)</option>
+        </select>
+      </div>
+      <div class="date-filter-box">
+        <span>📅 기준일:</span>
+        <input type="date" id="targetDate" class="date-input" value="2026-06-01" onchange="applyFilters()">
+        <button onclick="resetDate()" style="padding: 4px 8px; border:1px solid #ccc; background:#fff; border-radius:4px; cursor:pointer;">전체기간</button>
+      </div>
+      <input type="text" id="searchInput" class="search-input" placeholder="🔍 POS명, POS코드 검색..." onkeyup="applyFilters()">
     </div>
 
-</section>
-
-<!-- ================= PHONE ================= -->
-
-<section class="section" id="phones">
-
-    <div class="title">
-
-        <h2>휴대폰</h2>
-
-        <p>인기 스마트폰 안내</p>
-
+    <div class="store-list" id="store-container">
+      <div class="loading-text">구글 시트에서 실시간 데이터를 불러오는 중입니다...</div>
     </div>
-
-    <div class="cards">
-
-        <div class="card">
-
-            <i class="fa-solid fa-mobile-screen"></i>
-
-            <h3>Galaxy 시리즈</h3>
-
-            <p>
-                다양한 최신 모델 상담
-            </p>
-
-        </div>
-
-        <div class="card">
-
-            <i class="fa-brands fa-apple"></i>
-
-            <h3>iPhone 시리즈</h3>
-
-            <p>
-                최신 아이폰 상담
-            </p>
-
-        </div>
-
-        <div class="card">
-
-            <i class="fa-solid fa-tablet-screen-button"></i>
-
-            <h3>태블릿</h3>
-
-            <p>
-
-                업무와 학습을 위한
-                태블릿 상품
-
-            </p>
-
-        </div>
-
-    </div>
-
-</section>
-
-<!-- ================= INTERNET ================= -->
-
-<section class="section pink" id="internet">
-
-    <div class="title">
-
-        <h2>인터넷 · IPTV</h2>
-
-        <p>
-
-            우리 집에 맞는 상품을
-            상담받아 보세요.
-
-        </p>
-
-    </div>
-
-    <div class="cards">
-
-        <div class="card">
-
-            <i class="fa-solid fa-wifi"></i>
-
-            <h3>인터넷</h3>
-
-            <p>
-
-                안정적인 초고속 인터넷
-
-            </p>
-
-        </div>
-
-        <div class="card">
-
-            <i class="fa-solid fa-tv"></i>
-
-            <h3>IPTV</h3>
-
-            <p>
-
-                다양한 채널과 콘텐츠
-
-            </p>
-
-        </div>
-
-    </div>
-
-</section>
-
-<!-- ================= BENEFIT ================= -->
-
-<section class="section" id="benefit">
-
-    <div class="title">
-
-        <h2>가입 혜택</h2>
-
-    </div>
-
-    <div class="benefits">
-
-        <div>
-
-            ✔ 맞춤형 상담
-
-        </div>
-
-        <div>
-
-            ✔ 다양한 가입 혜택 안내
-
-        </div>
-
-        <div>
-
-            ✔ 휴대폰 · 인터넷 동시 상담
-
-        </div>
-
-        <div>
-
-            ✔ 친절한 사후 지원
-
-        </div>
-
-    </div>
-
-</section>
-
-<!-- ================= CONTACT ================= -->
-
-<section class="contact" id="contact">
-
-    <h2>
-
-        상담 신청
-
-    </h2>
-
-    <form>
-
-        <input
-                type="text"
-                placeholder="이름">
-
-        <input
-                type="tel"
-                placeholder="연락처">
-
-        <textarea
-                placeholder="문의 내용을 입력해주세요"></textarea>
-
-        <button>
-
-            상담 신청
-
-        </button>
-
-    </form>
-
-</section>
-
-<!-- ================= FOOTER ================= -->
-
-<footer>
-
-    <p>
-
-        본 사이트는 LG유플러스 (주)투드림 공식 홈페이지 입니다.
-
-    </p>
-
-    <p>
-
-        © 2026 Example Mobile Store
-
-    </p>
-
-</footer>
-
-<script src="js/main.js"></script>
-
+  </div>
+
+  <script>
+    // 🔗 1단계에서 복사한 구글 시트 웹 게시 CSV 링크를 아래 큰따옴표 안에 입력해 주세요.
+    const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRjVHw6K6oBZUyI0HSYjIe8Ra2Y7YSz1TXqOoXdGjQJhjxoMt4YXnfMrVfDygAWJDMoOptMad16j_Ss/pub?output=csv; 
+
+    let STORES = [];
+
+    // 비밀번호 검증 후 실시간 재조회
+    async function secureRefresh() {
+  // ① 비밀번호 입력
+  const pw = prompt("새로고침 비밀번호를 입력하세요:");
+  if (pw === null) {
+    return;
+  }
+  if (pw !== "0312") {
+    alert("비밀번호가 틀렸습니다.");
+    return;
+  }
+  // ② 화면에서 기준일 가져오기
+  const targetDate =
+    document.getElementById("targetDate").value;
+  if (!targetDate) {
+    alert("먼저 기준일을 선택해주세요.");
+    return;
+  }
+  // ③ 새로고침 버튼 상태 변경
+  const button =
+    document.querySelector(".btn-refresh");
+  const originalText =
+    button.textContent;
+  try {
+    button.disabled = true;
+    button.textContent = "? 확인 중...";
+    // ④ Netlify 함수 호출
+    const response = await fetch(
+      "/.netlify/functions/check-place",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          targetDate: targetDate
+        })
+      }
+    );
+    // ⑤ Netlify에서 받은 결과
+    const result = await response.json();
+    // 오류가 있다면
+    if (!response.ok) {
+      throw new Error(
+        result.message ||
+        "서버 연결에 실패했습니다."
+      );
+    }
+    // ⑥ 성공
+    alert(
+      "? " +
+      result.message +
+      "\n\n기준일: " +
+      result.targetDate
+    );
+  } catch (error) {
+    console.error(
+      "Netlify 함수 오류:",
+      error
+    );
+    alert(
+      "? 오류가 발생했습니다.\n\n" +
+      error.message
+    );
+  } finally {
+    // 버튼 원상복구
+    button.disabled = false;
+    button.textContent =
+      originalText;
+  }
+}
+
+    // CSV 파싱 알고리즘
+    function parseCSV(text) {
+      const lines = text.split('\n');
+      const result = [];
+      if (lines.length === 0) return result;
+      
+      const headers = lines[0].split(',').map(h => h.trim().replace(/^"|"$/g, ''));
+
+      for (let i = 1; i < lines.length; i++) {
+        if (!lines[i].trim()) continue;
+        const currentLine = lines[i].split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
+        const obj = {};
+        headers.forEach((header, index) => {
+          let val = currentLine[index] ? currentLine[index].trim() : '';
+          val = val.replace(/^"|"$/g, '');
+          obj[header] = val;
+        });
+        result.push(obj);
+      }
+      return result;
+    }
+
+    // 구글 시트 데이터 실시간 호출 (캐시 방지 param 적용)
+    async function fetchSheetData() {
+      const container = document.getElementById('store-container');
+      container.innerHTML = '<div class="loading-text">구글 시트에서 최신 데이터를 불러오는 중입니다...</div>';
+
+      try {
+        // 캐시를 방지하기 위해 타임스탬프 파라미터 추가
+        const cacheBuster = SHEET_CSV_URL.includes('?') ? `&t=${Date.now()}` : `?t=${Date.now()}`;
+        const response = await fetch(SHEET_CSV_URL + cacheBuster);
+        const csvText = await response.text();
+        
+        STORES = parseCSV(csvText);
+
+        initAgencyDropdown();
+        applyFilters();
+      } catch (error) {
+        console.error("데이터 로드 실패:", error);
+        container.innerHTML = '<div class="loading-text" style="color:red;">데이터를 불러오지 못했습니다.<br>구글 시트 게시 설정 및 CSV 링크를 확인해 주세요.</div>';
+      }
+    }
+
+    function initAgencyDropdown() {
+      const select = document.getElementById('agencyFilter');
+      const currentVal = select.value;
+      select.innerHTML = '<option value="ALL">전체 대리점(점명)</option>';
+      
+      const agencySet = new Set(STORES.map(s => s.store_name));
+      agencySet.forEach(agency => {
+        if (!agency) return;
+        const option = document.createElement('option');
+        option.value = agency;
+        option.textContent = agency;
+        select.appendChild(option);
+      });
+      select.value = currentVal;
+    }
+
+    function resetDate() {
+      document.getElementById('targetDate').value = '';
+      applyFilters();
+    }
+
+    function applyFilters() {
+      const selectedType = document.getElementById('typeFilter').value;
+      const selectedAgency = document.getElementById('agencyFilter').value;
+      const targetDateStr = document.getElementById('targetDate').value;
+      const searchKeyword = document.getElementById('searchInput').value.trim().toLowerCase();
+
+      const container = document.getElementById('store-container');
+      container.innerHTML = '';
+
+      let photoOkCount = 0;
+      let newsOkCount = 0;
+      const targetDate = targetDateStr ? new Date(targetDateStr) : null;
+
+      const filtered = STORES.filter(store => {
+        const matchType = (selectedType === 'ALL') || (store.type === selectedType);
+        const matchAgency = (selectedAgency === 'ALL') || (store.store_name === selectedAgency);
+        const matchSearch = (store.pos_name && store.pos_name.toLowerCase().includes(searchKeyword)) || 
+                            (store.pos_code && store.pos_code.toLowerCase().includes(searchKeyword)) ||
+                            (store.store_name && store.store_name.toLowerCase().includes(searchKeyword));
+        return matchType && matchAgency && matchSearch;
+      });
+
+      filtered.forEach(store => {
+        let isPhotoValid = false;
+        let isNewsValid = false;
+
+        if (targetDate) {
+          if (store.photo_date && store.photo_date !== '-' && store.photo_date !== '') {
+            if (new Date(store.photo_date) >= targetDate) isPhotoValid = true;
+          }
+          if (store.news_date && store.news_date !== '-' && store.news_date !== '') {
+            if (new Date(store.news_date) >= targetDate) isNewsValid = true;
+          }
+        } else {
+          if (store.photo_date && store.photo_date !== '-' && store.photo_date !== '') isPhotoValid = true;
+          if (store.news_date && store.news_date !== '-' && store.news_date !== '') isNewsValid = true;
+        }
+
+        if (isPhotoValid) photoOkCount++;
+        if (isNewsValid) newsOkCount++;
+
+        const isUrlValid = store.url && store.url.startsWith('http');
+        const card = document.createElement('div');
+        card.className = 'store-card';
+        
+        card.innerHTML = `
+          <div class="card-top">
+            <div>
+              <div class="pos-name">${store.pos_name || ''}</div>
+              <div class="store-agency">${store.store_name || ''} (${store.store_code || ''}) - POS: ${store.pos_code || ''}</div>
+            </div>
+            <div class="tag-container">
+              <span class="type-tag">${store.type || ''}</span>
+            </div>
+          </div>
+          <div class="update-status-grid">
+            <div class="status-box">
+              <div class="status-box-title">
+                <span>📷 사진 업데이트</span>
+                <span class="${isPhotoValid ? 'badge-ok' : 'badge-danger'}">${isPhotoValid ? '갱신완료' : '미갱신'}</span>
+              </div>
+              <div class="status-box-date ${isPhotoValid ? 'updated-ok' : 'updated-danger'}">
+                ${store.photo_date || '정보 없음'}
+              </div>
+            </div>
+            <div class="status-box">
+              <div class="status-box-title">
+                <span>📰 소식 업데이트</span>
+                <span class="${isNewsValid ? 'badge-ok' : 'badge-danger'}">${isNewsValid ? '갱신완료' : '미갱신'}</span>
+              </div>
+              <div class="status-box-date ${isNewsValid ? 'updated-ok' : 'updated-danger'}">
+                ${store.news_date || '정보 없음'}
+              </div>
+            </div>
+          </div>
+          ${isUrlValid 
+            ? `<a href="${store.url}" target="_blank" class="btn-link">네이버 플레이스 이동</a>`
+            : `<a class="btn-link disabled">${store.url || '링크 없음'}</a>`
+          }
+        `;
+        container.appendChild(card);
+      });
+
+      document.getElementById('total-count').innerText = filtered.length;
+      document.getElementById('photo-ok-count').innerText = photoOkCount;
+      document.getElementById('news-ok-count').innerText = newsOkCount;
+    }
+
+    window.onload = () => {
+      fetchSheetData();
+    };
+  </script>
 </body>
 </html>
